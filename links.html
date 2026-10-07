@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Link Access</title>
+    
+    <!-- Tailwind CSS for rapid UI layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            /* Fallback background, overridden by JS */
+            background: linear-gradient(135deg, #020617, #0f172a, #1e293b); 
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Fullscreen canvas for the dot animation */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none; /* Let clicks pass through to the buttons */
+        }
+
+        /* Dark Glassmorphism Panel */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            z-index: 10;
+        }
+
+        /* Sleek Dark Card Button with Neon Hover */
+        .glow-btn {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+            text-decoration: none;
+        }
+
+        .glow-btn:hover {
+            background: rgba(30, 41, 59, 1);
+            border-color: #38bdf8;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(56, 189, 248, 0.3), inset 0 0 15px rgba(56, 189, 248, 0.15);
+        }
+
+        .glow-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+        }
+
+        /* Avatar styling */
+        .avatar-container img {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+            transition: all 0.4s ease;
+        }
+
+        .avatar-container img:hover {
+            border-color: #38bdf8;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.5);
+            transform: scale(1.05) rotate(2deg);
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <!-- Interactive Background Canvas -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Main Content Panel -->
+    <main class="glass-panel w-full max-w-md mx-auto p-8 flex flex-col items-center text-center relative z-10 my-8">
+        
+        <!-- Profile Section -->
+        <div class="avatar-container mb-6">
+            <img src="https://placehold.co/120x120/1e293b/38bdf8?text=CS" alt="Profile Picture" class="w-28 h-28 rounded-full object-cover mx-auto">
+        </div>
+        
+        <h1 class="text-3xl font-bold mb-2 tracking-wide text-white drop-shadow-md">Collections Site</h1>
+        <p class="text-sm text-gray-300 mb-8 font-light drop-shadow-sm">UYFC Multiple Link Access Webpage</p>
+
+        <!-- Container where links will be injected dynamically -->
+        <div id="link-container" class="w-full flex flex-col space-y-4">
+            <!-- Links rendered via JS -->
+        </div>
+
+    </main>
+
+    <script>
+        /**
+         * ==========================================
+         * 🔗 LINK CONFIGURATION ARRAY
+         * ==========================================
+         * Add, remove, or edit your links right here.
+         */
+        const links = [
+            {
+                title: 'UYFC Archive Site',
+                url: 'https://uyfc-archive-site.vercel.app',
+                icon: 'fas fa-archive'
+            },
+            {
+                title: 'QR Code Counter Scanner',
+                url: 'https://script.google.com/macros/s/AKfycbxySMQz2ElCwLB7ZavJ1yeuBc17mGFzuyfEaua-AQNTZRUE0UpRgkgnk1H1Hfj3y7s/exec',
+                icon: 'fas fa-qrcode'
+            },
+            {
+                title: 'Monitor Workflows',
+                url: 'https://script.google.com/macros/s/AKfycbwryiCSG9REB5cUm8-1W9Il61QGHawPrMwhz_mtReZK0W6xs25w4PimB7Jz_hCyroC76A/exec',
+                icon: 'fas fa-tasks'
+            }
+        ];
+
+        function renderLinks() {
+            const container = document.getElementById('link-container');
+            container.innerHTML = '';
+
+            links.forEach(link => {
+                const a = document.createElement('a');
+                a.href = link.url;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                a.className = 'glow-btn w-full py-4 px-6 flex items-center justify-between group';
+                
+                a.innerHTML = `
+                    <div class="flex items-center space-x-4 w-full">
+                        <i class="${link.icon} text-xl w-6 text-center text-slate-400 group-hover:text-sky-400 transition-colors duration-300"></i>
+                        <span class="flex-1 text-left tracking-wide font-medium text-slate-200 group-hover:text-white transition-colors duration-300">${link.title}</span>
+                    </div>
+                    <i class="fas fa-arrow-right text-sm text-slate-500 group-hover:text-sky-400 transition-all transform group-hover:-rotate-45 duration-300"></i>
+                `;
+                container.appendChild(a);
+            });
+        }
+
+        renderLinks();
+
+        // --- Particle Network Animation Logic ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height;
+        let particles = [];
+        
+        // Configuration
+        const particleCount = window.innerWidth < 768 ? 50 : 100; // Responsive particle count
+        const connectionDistance = 130; 
+        const particleSpeed = 0.6;
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * particleSpeed;
+                this.vy = (Math.random() - 0.5) * particleSpeed;
+                this.radius = Math.random() * 2 + 0.5; // Size 0.5 to 2.5
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Wrap around edges for a continuous flowing effect
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) this.y = height;
+                if (this.y > height) this.y = 0;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)'; // White/transparent dots
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        // Set up variables for 3 distinct color stops to form a rich gradient
+        let h1 = Math.random() * 360, t1 = Math.random() * 360;
+        let h2 = Math.random() * 360, t2 = Math.random() * 360;
+        let h3 = Math.random() * 360, t3 = Math.random() * 360;
+        
+        // Lerp speed determines how fast colors shift
+        const colorSpeed = 0.002;
+
+        function animate() {
+            // Update targets if we are close to them
+            if (Math.abs(t1 - h1) < 2) t1 = Math.random() * 360;
+            if (Math.abs(t2 - h2) < 2) t2 = Math.random() * 360;
+            if (Math.abs(t3 - h3) < 2) t3 = Math.random() * 360;
+
+            // Lerp current hues towards targets
+            h1 += (t1 - h1) * colorSpeed;
+            h2 += (t2 - h2) * colorSpeed;
+            h3 += (t3 - h3) * colorSpeed;
+            
+            // Apply gradient to background. 
+            // We use low lightness (15%-25%) and high saturation (80%) for vibrant dark themes.
+            document.body.style.background = `linear-gradient(135deg, 
+                hsl(${h1}, 80%, 15%), 
+                hsl(${h2}, 80%, 20%), 
+                hsl(${h3}, 80%, 12%)
+            )`;
+
+            // Clear canvas for next frame
+            ctx.clearRect(0, 0, width, height);
+
+            // Update and draw dots
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            // Draw connecting lines
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < connectionDistance) {
+                        const opacity = 1 - (distance / connectionDistance);
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        // Lines match the glowing theme subtly
+                        ctx.strokeStyle = `rgba(186, 230, 253, ${opacity * 0.3})`;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Setup events and start
+        window.addEventListener('resize', () => {
+            resize();
+            initParticles();
+        });
+
+        // Bootstrap the canvas background
+        window.onload = function() {
+            resize();
+            initParticles();
+            animate();
+        };
+
+    </script>
+</body>
+</html>
